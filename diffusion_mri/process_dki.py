@@ -11,7 +11,12 @@ from scipy.ndimage import gaussian_filter
 
 # Arguments
 __description__ = '''
-DKI model is fit using the constrained weighted least squares (CWLS) method.
+Fit the diffusion kurtosis model to the data.
+
+Kurtosis values are clipped between 0-3 for plausible values.
+Option to smooth the data (recommended)
+
+Outputs include: Mean kurtosis, Axial kurtosis and radial kurtosis.
 '''
 
 # collect inputs
