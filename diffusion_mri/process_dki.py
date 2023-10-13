@@ -11,7 +11,12 @@ from scipy.ndimage import gaussian_filter
 
 # Arguments
 __description__ = '''
-DKI model is fit using the constrained weighted least squares (CWLS) method.
+Fit the diffusion kurtosis model to the data.
+
+Kurtosis values are clipped between 0-3 for plausible values.
+Option to smooth the data (recommended)
+
+Outputs include: Mean kurtosis, Axial kurtosis and radial kurtosis.
 '''
 
 # collect inputs
@@ -33,6 +38,7 @@ parser.add_argument('-m', '--mask',
                     required=False)
 parser.add_argument('-s', '--smooth',
                     help='Smooth the data with a gaussian filter with FWHM of 1.25mm. Default is False.',
+                    action='store_true',
                     required=False)
 args = parser.parse_args()
 
@@ -49,6 +55,7 @@ affine = img.affine
 # if smooth specified, smooth the data
 # often recommended to smooth data before fitting DKI
 if args.smooth:
+    print('Smoothing data with gaussian kernel...')
     fwhm = 1.25
     gauss_std = fwhm / np.sqrt(8 * np.log(2))  # converting fwhm to Gaussian std
     data_input = np.zeros(data.shape)
@@ -73,7 +80,7 @@ else:
 
 # initialise DKI model
 print("Initialising DKI model...")
-dkimodel = dki.DiffusionKurtosisModel(gtab, fit_method='CLS')
+dkimodel = dki.DiffusionKurtosisModel(gtab)
 
 # fit the DKI model
 print("Fitting DKI model...")
@@ -83,9 +90,9 @@ t1 = time.time()
 print("Fitting took: " + str((t1-t0)/60) + " minutes")
 
 # extract mean kurtosis, axial kurtosis and radial kurtosis from the dkimodel
-MK = dkifit.mk
-AK = dkifit.ak
-RK = dkifit.rk
+MK = dkifit.mk(0,3)
+AK = dkifit.ak(0,3)
+RK = dkifit.rk(0,3)
 
 # save outputs
 MK_nifti = nib.Nifti1Image(MK, affine)
